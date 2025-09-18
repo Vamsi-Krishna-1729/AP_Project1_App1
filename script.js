@@ -1,39 +1,37 @@
-var map = L.map('map').setView([37.7, -122.4], 12);
+var map = L.map('map').setView([37.7, -122.4], 11);
 
-L.tileLayer('https://a.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: 'Map tiles by Stamen Design, under CC BY 3.0.',
-	minZoom: 0,
-	maxZoom: 20,
+var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-// Crime incidents layer
+var crimeLayer;
 $.getJSON("https://raw.githubusercontent.com/orhuna/WebGIS_SLU_M1/main/Module%201/Assignment%201/data/sf_crime.geojson", function(data) {
-  L.geoJson(data, {
+  var crimeIcon = L.icon({
+    iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34]
+  });
+
+  crimeLayer = L.geoJson(data, {
     pointToLayer: function(feature, latlng) {
-      return L.circleMarker(latlng, {
-        radius: 5,
-        fillColor: "red",
-        color: "darkred",
-        weight: 1,
-        fillOpacity: 0.7
-      });
+      return L.marker(latlng, { icon: crimeIcon });
     },
     onEachFeature: function(feature, layer) {
       var popup = "<b>Crime Incident</b><br>";
-      if (feature.properties.category) {
-        popup += "Category: " + feature.properties.category + "<br>";
-      }
-      if (feature.properties.date) {
-        popup += "Date: " + feature.properties.date;
-      }
+      if (feature.properties.category) popup += "Category: " + feature.properties.category + "<br>";
+      if (feature.properties.date) popup += "Date: " + feature.properties.date;
       layer.bindPopup(popup);
     }
-  }).addTo(map);
+  });
+  crimeLayer.addTo(map);
+  control.addOverlay(crimeLayer, "Crime Incidents");
 });
 
-// Rodent sightings layer
+
+var rodentLayer;
 $.getJSON("https://raw.githubusercontent.com/orhuna/WebGIS_SLU_M1/main/Module%201/Assignment%201/data/rodents.geojson", function(data) {
-  L.geoJson(data, {
+  rodentLayer = L.geoJson(data, {
     pointToLayer: function(feature, latlng) {
       return L.circleMarker(latlng, {
         radius: 5,
@@ -45,19 +43,18 @@ $.getJSON("https://raw.githubusercontent.com/orhuna/WebGIS_SLU_M1/main/Module%20
     },
     onEachFeature: function(feature, layer) {
       var popup = "<b>Rodent Sighting</b><br>";
-      if (feature.properties.address) {
-        popup += "Address: " + feature.properties.address + "<br>";
-      }
-      if (feature.properties.date) {
-        popup += "Date: " + feature.properties.date;
-      }
+      if (feature.properties.address) popup += "Address: " + feature.properties.address + "<br>";
+      if (feature.properties.date) popup += "Date: " + feature.properties.date;
       layer.bindPopup(popup);
     }
-  }).addTo(map);
+  });
+  rodentLayer.addTo(map);
+  control.addOverlay(rodentLayer, "Rodent Sightings");
 });
 
+var chicagoLayer;
 $.getJSON("https://raw.githubusercontent.com/orhuna/WebGIS_SLU_M1/main/Module%201/Assignment%201/data/chicago.geojson", function(data) {
-  L.geoJson(data, {
+  chicagoLayer = L.geoJson(data, {
     style: {
       color: "blue",
       weight: 2,
@@ -65,13 +62,12 @@ $.getJSON("https://raw.githubusercontent.com/orhuna/WebGIS_SLU_M1/main/Module%20
     },
     onEachFeature: function(feature, layer) {
       var popup = "<b>Chicago Boundary</b>";
-      if (feature.properties.name) {
-        popup += "<br>Name: " + feature.properties.name;
-      }
+      if (feature.properties.name) popup += "<br>Name: " + feature.properties.name;
       layer.bindPopup(popup);
     }
-  }).addTo(map);
+  });
+  chicagoLayer.addTo(map);
+  control.addOverlay(chicagoLayer, "Chicago Boundary");
 });
 
-
-
+var control = L.control.layers({"OpenStreetMap": osm}, {}, {collapsed:false}).addTo(map);
